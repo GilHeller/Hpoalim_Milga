@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, Award, Bell, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Gift, PieChart, Share2, Sliders, Star, Users } from 'lucide-react';
+import { AlertCircle, Award, Bell, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Gift, Lock, LogIn, Mail, PieChart, Share2, Sliders, Star, User, Users } from 'lucide-react';
 
 export default function DeanExcellenceApp() {
   const [screen, setScreen] = useState('splash');
@@ -13,7 +13,11 @@ export default function DeanExcellenceApp() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [monthlyAddition, setMonthlyAddition] = useState(100);
   const [showNotification, setShowNotification] = useState(false);
-  
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   const remaining = goal - savings;
   const progress = (savings / goal) * 100;
   const timeProgress = (months / totalMonths) * 100;
@@ -22,7 +26,9 @@ export default function DeanExcellenceApp() {
     setSavings(prev => prev + amount);
     setShowDepositModal(false);
     setShowNotification(true);
+    setShowConfetti(true);
     setTimeout(() => setShowNotification(false), 3000);
+    setTimeout(() => setShowConfetti(false), 5000);
   };
   
   const calculateFutureSavings = () => {
@@ -30,26 +36,123 @@ export default function DeanExcellenceApp() {
     return savings + (monthlyAddition * remainingMonths);
   };
   
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setLoginError('יש למלא את כל השדות');
+      return;
+    }
+    
+    // Simple validation - in a real app, this would be a backend call
+    if (email.includes('@') && password.length >= 6) {
+      setLoginError('');
+      setScreen('dashboard');
+    } else {
+      setLoginError('שם משתמש או סיסמה לא תקינים');
+    }
+  };
+  
   if (screen === 'splash') {
     return (
       <div className="bg-gray-100 h-screen w-full flex flex-col items-center justify-center p-6 text-right" dir="rtl">
+        {showConfetti && <div className="absolute inset-0 z-50">Confetti Animation</div>}
         <div className="flex flex-col items-center justify-center space-y-10 max-w-md w-full">
           <div className="text-center">
             <div className="bg-red-600 rounded-full p-3 mb-4 inline-block">
-              {React.createElement(Award, { size: 40, className: "text-white" })}
+              <Award size={40} className="text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">מצטייני דיקאן</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">מצטייני בנקאי</h1>
             <p className="text-lg text-red-600 font-medium">חוסכים היום, זוכים למחר</p>
           </div>
           
-          {React.createElement(
-            'button', 
-            { 
-              onClick: () => setScreen('dashboard'),
-              className: "bg-red-600 text-white rounded-lg py-4 px-6 w-full font-medium text-lg shadow-lg hover:bg-red-700 transition-colors"
-            },
-            'התחל לעקוב אחרי החיסכון שלך'
-          )}
+          <button 
+            onClick={() => setScreen('login')}
+            className="bg-red-600 text-white rounded-lg py-4 px-6 w-full font-medium text-lg shadow-lg hover:bg-red-700 transition-colors"
+          >
+            התחל לעקוב אחרי החיסכון שלך
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (screen === 'login') {
+    return (
+      <div className="bg-gray-100 h-screen w-full flex flex-col items-center justify-center p-6 text-right" dir="rtl">
+        <div className="flex flex-col items-center justify-center space-y-6 max-w-md w-full bg-white rounded-lg shadow-md p-8">
+          <div className="text-center mb-2">
+            <div className="bg-red-600 rounded-full p-2 mb-4 inline-block">
+              <Award size={32} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">התחברות למצטייני בנקאי</h1>
+            <p className="text-sm text-gray-600">הזן את פרטי החשבון שלך</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="w-full space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">דוא"ל</label>
+              <div className="relative">
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                  placeholder="name@example.com"
+                />
+                <Mail size={18} className="absolute left-3 top-3.5 text-gray-400" />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">סיסמה</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+                  placeholder="••••••••"
+                />
+                <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
+              </div>
+            </div>
+            
+            {loginError && (
+              <div className="text-red-500 text-sm py-1 flex items-center">
+                <AlertCircle size={16} className="ml-1" />
+                {loginError}
+              </div>
+            )}
+            
+            <button 
+              type="submit"
+              className="bg-red-600 text-white rounded-lg py-3 px-6 w-full font-medium shadow-sm hover:bg-red-700 transition-colors flex items-center justify-center"
+            >
+              <LogIn size={18} className="ml-2" />
+              התחברות
+            </button>
+          </form>
+          
+          <div className="text-center w-full pt-4 border-t border-gray-200 mt-2">
+            <button
+              onClick={() => setScreen('dashboard')} 
+              className="text-sm text-red-600 hover:text-red-700 font-medium"
+            >
+              התחברות ללא רישום (דמו)
+            </button>
+          </div>
+          
+          <div className="flex justify-center w-full">
+            <button 
+              onClick={() => setScreen('splash')}
+              className="flex items-center text-gray-500 hover:text-gray-700 text-sm"
+            >
+              <ChevronRight size={16} className="ml-1" />
+              חזרה למסך הפתיחה
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -58,18 +161,22 @@ export default function DeanExcellenceApp() {
   return (
     <div className="bg-gray-100 min-h-screen w-full flex flex-col" dir="rtl">
       {/* Header */}
-      {React.createElement('header', { className: "bg-white p-4 shadow-sm" },
-        React.createElement('div', { className: "flex justify-between items-center max-w-lg mx-auto" },
-          React.createElement('div', { className: "flex items-center" },
-            React.createElement(Award, { className: "text-red-600 mr-2", size: 24 }),
-            React.createElement('h1', { className: "text-xl font-bold text-gray-800" }, "מצטייני דיקאן")
-          ),
-          React.createElement('div', { className: "flex space-x-3" },
-            React.createElement(Bell, { className: "text-gray-600", size: 20 }),
-            React.createElement(Sliders, { className: "text-gray-600", size: 20 })
-          )
-        )
-      )}
+      <header className="bg-white p-4 shadow-sm">
+        <div className="flex justify-between items-center max-w-lg mx-auto">
+          <div className="flex items-center">
+            <Award className="text-red-600 ml-2" size={24} />
+            <h1 className="text-xl font-bold text-gray-800">מצטייני בנקאי</h1>
+          </div>
+          <div className="flex space-x-3">
+            <div className="flex items-center">
+              <User size={18} className="text-gray-600 ml-1" />
+              <p>שלום,{email.split("@")?.[0]}!</p>
+            </div>
+            <Bell className="text-gray-600 mr-2" size={20} />
+            <Sliders className="text-gray-600" size={20} />
+          </div>
+        </div>
+      </header>
       
       {/* Main Dashboard */}
       <main className="flex-1 max-w-lg w-full mx-auto p-4">
@@ -143,7 +250,7 @@ export default function DeanExcellenceApp() {
               עברתי את החצי
             </div>
             <div className="bg-gray-100 text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full">
-              חסכן חודש יוני
+              חסכן חודש מאי
             </div>
           </div>
         </div>
@@ -152,7 +259,7 @@ export default function DeanExcellenceApp() {
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <div className="flex items-center mb-3">
             <Users className="text-red-500 ml-2" size={20} />
-            <h2 className="text-lg font-medium">קהילת מצטייני דיקאן</h2>
+            <h2 className="text-lg font-medium">קהילת מצטייני בנקאי</h2>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
