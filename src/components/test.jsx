@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
-import { AlertCircle, Award, Bell, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Gift, Lock, LogIn, Mail, PieChart, Share2, Sliders, Star, User, Users } from 'lucide-react';
+import { AlertCircle, Award, Bell, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Edit, Gift, Lock, LogIn, Mail, PieChart, Settings, Share2, Sliders, Star, User, Users } from 'lucide-react';
 
 export default function DeanExcellenceApp() {
+  // Core state
   const [screen, setScreen] = useState('splash');
   const [savings, setSavings] = useState(2800);
-  const [goal] = useState(4000);
-  const [months] = useState(8);
-  const [totalMonths] = useState(12);
+  const [goal, setGoal] = useState(4000);
+  const [months, setMonths] = useState(8);
+  const [totalMonths, setTotalMonths] = useState(12);
+
+  // UI state
   const [quickDepositAmount, setQuickDepositAmount] = useState(100);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showSimulatorModal, setShowSimulatorModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [monthlyAddition, setMonthlyAddition] = useState(100);
   const [showNotification, setShowNotification] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  
+  // Settings form state
+  const [tempGoal, setTempGoal] = useState(goal);
+  const [tempTotalMonths, setTempTotalMonths] = useState(totalMonths);
+  const [tempCurrentMonth, setTempCurrentMonth] = useState(months);
 
   const remaining = goal - savings;
   const progress = (savings / goal) * 100;
@@ -50,6 +61,15 @@ export default function DeanExcellenceApp() {
     } else {
       setLoginError('שם משתמש או סיסמה לא תקינים');
     }
+  };
+  
+  const saveSettings = () => {
+    setGoal(tempGoal);
+    setTotalMonths(tempTotalMonths);
+    setMonths(tempCurrentMonth);
+    setShowSettingsModal(false);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
   };
   
   if (screen === 'splash') {
@@ -170,10 +190,12 @@ export default function DeanExcellenceApp() {
           <div className="flex space-x-3">
             <div className="flex items-center">
               <User size={18} className="text-gray-600 ml-1" />
-              <p>שלום,{email.split("@")?.[0]}!</p>
+              <p className="text-sm">שלום, {email ? email.split("@")[0] : "משתמש"}!</p>
             </div>
             <Bell className="text-gray-600 mr-2" size={20} />
-            <Sliders className="text-gray-600" size={20} />
+            <button onClick={() => setShowSettingsModal(true)}>
+              <Settings className="text-gray-600" size={20} />
+            </button>
           </div>
         </div>
       </header>
@@ -183,16 +205,32 @@ export default function DeanExcellenceApp() {
         {/* Status Bar */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <div className="mb-3">
-            <div className="flex justify-between mb-1">
+            <div className="flex justify-between mb-1 items-center">
               <span className="text-sm text-gray-500">הסכום שחסכת</span>
-              <span className="text-sm font-medium">{savings.toLocaleString()} ₪ מתוך {goal.toLocaleString()} ₪</span>
+              <div className="flex items-center">
+                <span className="text-sm font-medium">{savings.toLocaleString()} ₪ מתוך {goal.toLocaleString()} ₪</span>
+                <button 
+                  onClick={() => setShowSettingsModal(true)}
+                  className="ml-1 text-gray-400 hover:text-gray-600"
+                >
+                  <Edit size={14} />
+                </button>
+              </div>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div className="bg-red-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+              <div 
+                className="bg-red-600 h-2.5 rounded-full transition-all duration-500" 
+                style={{ width: `${progress > 100 ? 100 : progress}%` }}
+              ></div>
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <div className="text-gray-800 font-medium">נותרו לך: {remaining.toLocaleString()} ₪ לחיסכון מלא</div>
+            <div className="text-gray-800 font-medium">
+              {remaining <= 0 
+                ? <span className="text-green-600">השגת את היעד! כל הכבוד!</span> 
+                : `נותרו לך: ${remaining.toLocaleString()} ₪ לחיסכון מלא`
+              }
+            </div>
             <button 
               onClick={() => setShowDepositModal(true)}
               className="bg-red-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-red-700"
@@ -204,9 +242,17 @@ export default function DeanExcellenceApp() {
         
         {/* Time Progress */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <div className="flex items-center mb-2">
-            <Clock className="text-red-600 ml-2" size={20} />
-            <h2 className="text-lg font-medium">התקדמות זמן</h2>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Clock className="text-red-600 ml-2" size={20} />
+              <h2 className="text-lg font-medium">התקדמות זמן</h2>
+            </div>
+            <button 
+              onClick={() => setShowSettingsModal(true)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <Edit size={14} />
+            </button>
           </div>
           <div className="mb-2">
             <div className="flex justify-between mb-1">
@@ -214,7 +260,10 @@ export default function DeanExcellenceApp() {
               <span className="text-sm font-medium">{months} חודשים מתוך {totalMonths}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div className="bg-gray-600 h-2.5 rounded-full" style={{ width: `${timeProgress}%` }}></div>
+              <div 
+                className="bg-gray-600 h-2.5 rounded-full transition-all duration-500" 
+                style={{ width: `${timeProgress > 100 ? 100 : timeProgress}%` }}
+              ></div>
             </div>
           </div>
         </div>
@@ -246,9 +295,21 @@ export default function DeanExcellenceApp() {
             <h2 className="text-lg font-medium">תגים והישגים</h2>
           </div>
           <div className="flex space-x-2 mb-2">
-            <div className="bg-red-100 text-red-800 text-xs font-medium px-3 py-1.5 rounded-full">
-              עברתי את החצי
-            </div>
+            {progress >= 50 && (
+              <div className="bg-red-100 text-red-800 text-xs font-medium px-3 py-1.5 rounded-full">
+                עברתי את החצי
+              </div>
+            )}
+            {progress >= 75 && (
+              <div className="bg-red-100 text-red-800 text-xs font-medium px-3 py-1.5 rounded-full">
+                קרוב ליעד
+              </div>
+            )}
+            {progress < 50 && (
+              <div className="bg-gray-100 text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full">
+                חסכן מתחיל
+              </div>
+            )}
             <div className="bg-gray-100 text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full">
               חסכן חודש מאי
             </div>
@@ -309,8 +370,8 @@ export default function DeanExcellenceApp() {
                 <span className="absolute left-3 top-3 text-xl font-bold">₪</span>
               </div>
             </div>
-            <div className="flex space-x-3">
-              {[50, 100, 200].map(amount => (
+            <div className="flex gap-2 mb-4">
+              {[50, 100, 200, 500].map(amount => (
                 <button
                   key={amount}
                   onClick={() => setQuickDepositAmount(amount)}
@@ -324,7 +385,7 @@ export default function DeanExcellenceApp() {
                 </button>
               ))}
             </div>
-            <div className="flex space-x-3 mt-6">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowDepositModal(false)}
                 className="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg"
@@ -381,6 +442,75 @@ export default function DeanExcellenceApp() {
         </div>
       )}
       
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 className="text-xl font-bold mb-4 text-center">הגדרות החיסכון שלי</h3>
+            <div className="flex justify-center mb-6">
+              <div className="bg-gray-100 rounded-full p-3">
+                <Settings size={32} className="text-gray-600" />
+              </div>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-gray-700 mb-2">סכום יעד חיסכון</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={tempGoal}
+                    onChange={(e) => setTempGoal(Number(e.target.value))}
+                    className="w-full p-3 border border-gray-300 rounded-lg pr-3 pl-8"
+                  />
+                  <span className="absolute left-3 top-3 font-medium">₪</span>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 mb-2">סך כל החודשים בתוכנית</label>
+                <input
+                  type="number"
+                  value={tempTotalMonths}
+                  onChange={(e) => setTempTotalMonths(Number(e.target.value))}
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  min="1"
+                  max="48"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 mb-2">החודש הנוכחי</label>
+                <input
+                  type="number"
+                  value={tempCurrentMonth}
+                  onChange={(e) => setTempCurrentMonth(Math.min(Number(e.target.value), tempTotalMonths))}
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  min="1"
+                  max={tempTotalMonths}
+                />
+                <p className="text-xs text-gray-500 mt-1">חייב להיות פחות או שווה למספר החודשים הכולל ({tempTotalMonths})</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={saveSettings}
+                className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg"
+              >
+                שמור שינויים
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -425,7 +555,7 @@ export default function DeanExcellenceApp() {
         <div className="fixed bottom-20 left-0 right-0 flex justify-center pointer-events-none">
           <div className="bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center max-w-xs">
             <AlertCircle className="ml-2" size={20} />
-            <span>ההפקדה בוצעה בהצלחה!</span>
+            <span>הפעולה בוצעה בהצלחה!</span>
           </div>
         </div>
       )}
