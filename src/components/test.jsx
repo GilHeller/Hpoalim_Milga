@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, Award, Bell, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Edit, Gift, Lock, LogIn, Mail, PieChart, Settings, Share2, Sliders, Star, User, Users } from 'lucide-react';
+import CoolRedBar from './ProgressBar/ProgressBar';
 
 export default function DeanExcellenceApp() {
   // Core state
@@ -254,18 +255,7 @@ export default function DeanExcellenceApp() {
               <Edit size={14} />
             </button>
           </div>
-          <div className="mb-2">
-            <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-500">התקדמות בתוכנית</span>
-              <span className="text-sm font-medium">{months} חודשים מתוך {totalMonths}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-gray-600 h-2.5 rounded-full transition-all duration-500" 
-                style={{ width: `${timeProgress > 100 ? 100 : timeProgress}%` }}
-              ></div>
-            </div>
-          </div>
+          <CoolRedBar percentage={timeProgress} label={`התקדמות בתוכנית (${months} מתוך ${totalMonths} חודשים)`} />
         </div>
         
         {/* Simulator */}
